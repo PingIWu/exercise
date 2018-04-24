@@ -13,6 +13,7 @@
 #include <TLorentzVector.h>
 #include <TH1F.h>
 #include <TGraph.h>
+#include <TMatrixD.h>
 
 using namespace std;
 void xAna_hh(std::string inputFile){
@@ -24,10 +25,16 @@ void xAna_hh(std::string inputFile){
   Long64_t nPass[20]={0};
 
   TH1F* h_SD=new TH1F("h_SD","",100,0,200);
-  TH1F* h_nVtx=new TH1F("h_nVtx","",100,0,100);
-  Double_t nVtxk[71]; //nVtx of nPass[3]
-  Double_t nVtxt[71]; //total nVtx after classified and changed into array form
-  Double_t nVtxu[71]; //unit of nVtx
+  TH1F* h_nVtx=new TH1F("h_nVtx","",14,0,70);
+  TH1F* h_nPass3=new TH1F("h_nPass3","",14,0,70);
+  TH1F* h_eff=(TH1F*)h_nVtx->Clone("h_eff");
+    h_nVtx->Sumw2();
+    h_nPass3->Sumw2();
+    //Double_t nVtxk[70]={0}; //nVtx of nPass[3]
+    //Double_t nVtxt[70]={0}; //total nVtx after classified and changed into array form
+    //Double_t nVtxu[70]={0}; //unit of nVtx
+    //Double_t efficiency[70]={0};
+    //float_t n=0.1;
   //Event loop
   for(Long64_t jEntry=0; jEntry<data.GetEntriesFast() ;jEntry++){
 
@@ -43,10 +50,14 @@ void xAna_hh(std::string inputFile){
     nPass[0]++;
     h_nVtx->Fill(nVtx);
       //classify nVtx, turns into array form
-      for (int j=1;j<=70;j++)
-        {
-            if ((j-0.5)<=nVtx && nVtx<=(j+0.5)) nVtxt[j]++;
-        }
+      //for (int j=0;j<=69;j++)
+      //{
+        //  if (nVtx>=(j-n) && nVtx<=(j+n))
+      //{
+                //nVtxt[j]++;
+         //     std::cout << "nVtxt[" << j << "]= " << nVtxt[j] << std::endl;
+      //    }
+      //}
       
     int nFATJet         = data.GetInt("FATnJet");
     const int nJets=nFATJet;
@@ -93,33 +104,49 @@ void xAna_hh(std::string inputFile){
     // if both fat jets have at least two subjet btags
     if(nSubBTag[0]>1 && nSubBTag[1]>1)
         {nPass[3]++;
+            h_nPass3->Fill(nVtx);
             // the amount of nVtx
-            for(int k=1; k<=70; k++)
-            {
-                if ((k-0.5)<=nVtx && nVtx<=(k+0.5)) nVtxk[k]++;
-    }
+           // for(int m=0; m<=69; m++)
+            //{
+             //   if (nVtx>=(m-n) && nVtx<=(m+n)) nVtxk[m]++;
+    //}
   } // end of loop over entries
  
-    Double_t efficiency[71];
-    for (int l=1;l<=70;l++)
-    {
+    
+    //for (int l=0;l<=69;l++)
+    //{
         //nVtxu is the x-axis of the nVtx (unit)
-        nVtxu[0]=0;
-        nVtxu[l]=l;
+        //nVtxu[0]=0;
+    //    nVtxu[l]=l;
         //counting efficiency, denominator cannot be negative
-        efficiency[0]=0;
-        if (nVtxt[l]!=0) efficiency[l]=(nVtxk[l]/nVtxt[l])*1.0;
-    }
+     //   if (nVtxt[l]==0)continue;
+      //  efficiency[l]=(nVtxk[l]/nVtxt[l])*1.0;
+    //}
   
-    //
-    TGraph *efu = new TGraph(71,nVtxu,efficiency);
-    efu->Draw("AC*");
   }
+    //TGraph *efu = new TGraph(70,nVtxu,efficiency);
+    //efu->Draw("AC*");
+    //h_nPass3->Draw();
+    h_eff->Divide(h_nPass3,h_nVtx,1,1,"B");
+    h_eff->Draw();
+    //for(int p=0;p<70;p++)
+    //    if(nVtxt[p]>=0)
+    //        std::cout << "nVtxt[" << p << "]= " << nVtxt[p] << std::endl;
+    //for(int q=0;q<70;q++)
+    //    if(nVtxk[q]>=0)
+    //        std::cout << "nVtxk[" << q << "]= " << nVtxk[q] << std::endl;
+    //for(int n=0;n<70;n++)
+    //    if(efficiency[n]>=0)
+    //        std::cout << "efficiency[" << n << "]= " << efficiency[n] << std::endl;
+    //for(int o=0;o<70;o++)
+    //    if(nVtxu[o]>=0)
+    //        std::cout << "nVtxu[" << o << "]= " << nVtxu[o] << std::endl;
+    
+    
   std::cout << "nTotal    = " << nTotal << std::endl;
   for(int i=0;i<20;i++)
     if(nPass[i]>0)
       std::cout << "nPass[" << i << "]= " << nPass[i] << std::endl;
-    
     
   
 }
@@ -132,3 +159,5 @@ void xAna_hh(std::string inputFile){
 //Statistics(poisson guassion binomial distribution)
 //error
 
+//Statistics(poisson guassion binomial distribution)!!
+//overflow,underflow,gstyle->SetOpstat(111111)
